@@ -1,0 +1,22 @@
+{
+  "name": "late-checkout",
+  "version": "1.0.0",
+  "description": "A hospitality management platform designed to automate and monetize late checkout requests for hotels and short-term rentals.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hospitality",
+    "late-checkout",
+    "management",
+    "platform",
+    "react",
+    "node",
+    "postgresql",
+    "stripe",
+    "twilio"
+  ],
+  "author": "",
+  "license": "ISC"
+}

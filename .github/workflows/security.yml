@@ -1,0 +1,54 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: '0 8 * * 1' # Weekly on Mondays at 8 AM
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  secrets:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sast:
+    name: SAST (Node.js Security Scan)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run njsscan
+        uses: ajinabraham/njsscan-action@master
+        with:
+          args: '.'
+
+  deps:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies (lockfile only)
+        # Generate lockfile if it doesn't exist, needed for audit
+        run: npm install --package-lock-only --ignore-scripts
+      - name: Run npm audit
+        # Fails if vulnerabilities are found
+        run: npm audit --audit-level=high
