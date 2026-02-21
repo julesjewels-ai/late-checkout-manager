@@ -1,0 +1,4 @@
+Phase 1: Foundation
+Status: In Progress
+Current Task: Implement Guest Request Domain Model
+Last Updated: Foundation Complete
