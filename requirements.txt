@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+pydantic
+pytest
+mypy
+flake8
+pydeps
+httpx

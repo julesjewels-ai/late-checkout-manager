@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "late-checkout"
+version = "0.1.0"
+description = "A hospitality management platform for late checkout"
+authors = [{name = "Jules", email = "jules@example.com"}]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic"
+]
+
+[tool.mypy]
+python_version = "3.10"
+mypy_path = "src"
+strict = true
+ignore_missing_imports = true
