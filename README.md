@@ -4,11 +4,9 @@ A hospitality management platform designed to automate and monetize late checkou
 
 ## Tech Stack
 
-- React
-- Node.js
-- PostgreSQL
-- Stripe API
-- Twilio API
+- **Backend:** Python (FastAPI)
+- **Database:** PostgreSQL
+- **Integrations:** Stripe API, Twilio API
 
 ## Features
 
@@ -17,3 +15,27 @@ A hospitality management platform designed to automate and monetize late checkou
 - Real-time integration with Property Management Systems (PMS)
 - Automated SMS/Email notifications for housekeeping staff
 - Instant payment processing for upsells
+
+## Getting Started
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-repo/late-checkout.git
+    cd late-checkout
+    ```
+
+2.  **Create a virtual environment:**
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate
+    ```
+
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Run the application:**
+    ```bash
+    uvicorn src.late_checkout.main:app --reload
+    ```
