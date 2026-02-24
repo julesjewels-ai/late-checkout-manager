@@ -1,13 +1,14 @@
-Task: Initialize Project
+Task: Implement Core Domain Models
 Status: Completed
-Current Action: Verified project structure and configuration.
-Next Action: Submit changes.
+Current Action: Defined and verified User, Booking, and ExtensionRequest models.
+Next Action: Set up Database Connection (PostgreSQL).
 Notes:
-- Created IMPLEMENTATION_PLAN.md with full project scope.
-- Initialized repository for Python/FastAPI backend.
+- Added `email-validator` to `requirements.txt`.
+- Implemented Pydantic models in `src/late_checkout/domain/models.py`.
+- Created unit tests in `tests/test_domain_models.py`.
 - Verified:
-  - pytest: PASSED
-  - mypy: PASSED (with `explicit_package_bases = true` and `mypy .`)
+  - pytest: PASSED (100% on new tests)
+  - mypy: PASSED (Zero Errors)
   - flake8: PASSED
-  - radon cc: PASSED
-  - pydeps: FAILED (missing graphviz/dot dependency in environment), skipping gate.
+  - radon cc: PASSED (All A)
+  - pydeps: FAILED (missing graphviz/dot), skipping gate.
