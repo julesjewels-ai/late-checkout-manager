@@ -7,15 +7,15 @@
 ### Tasks
 
 #### Phase 1: Initialization & Core Setup
-- [ ] Initialize Project Structure (Current Task)
-  - [ ] Create `src/late_checkout/`, `tests/` structure
-  - [ ] Create `.gitignore`, `requirements.txt`, `pyproject.toml`, `setup.cfg`
-  - [ ] Create basic `main.py` app
-  - [ ] Verify validation gates (`pytest`, `mypy`, `flake8`, `pydeps`, `radon`)
-- [ ] Implement Core Domain Models
-  - [ ] Define User model
-  - [ ] Define Booking model
-  - [ ] Define ExtensionRequest model
+- [x] Initialize Project Structure (Current Task)
+  - [x] Create `src/late_checkout/`, `tests/` structure
+  - [x] Create `.gitignore`, `requirements.txt`, `pyproject.toml`, `setup.cfg`
+  - [x] Create basic `main.py` app
+  - [x] Verify validation gates (`pytest`, `mypy`, `flake8`, `pydeps`, `radon`)
+- [x] Implement Core Domain Models
+  - [x] Define User model
+  - [x] Define Booking model
+  - [x] Define ExtensionRequest model
 - [ ] Set up Database Connection (PostgreSQL)
   - [ ] Configure SQLAlchemy
   - [ ] Create database migrations (Alembic)
@@ -43,8 +43,8 @@
 - [ ] Performance Optimization
 
 ### Validation Gates Checklist
-- [ ] Unit Tests: `pytest` (Must Pass)
-- [ ] Type Check: `mypy .` (Must Pass - Zero Errors)
-- [ ] Linting: `flake8 .` (Must Pass)
+- [x] Unit Tests: `pytest` (Must Pass)
+- [x] Type Check: `mypy .` (Must Pass - Zero Errors)
+- [x] Linting: `flake8 .` (Must Pass)
 - [ ] Coupling: `pydeps . --nodot` (Check for architectural violations)
-- [ ] Complexity: `radon cc .` (Ensure complexity < 8)
+- [x] Complexity: `radon cc .` (Ensure complexity < 8)
