@@ -16,9 +16,9 @@
   - [x] Define User model
   - [x] Define Booking model
   - [x] Define ExtensionRequest model
-- [ ] Set up Database Connection (PostgreSQL)
-  - [ ] Configure SQLAlchemy
-  - [ ] Create database migrations (Alembic)
+- [x] Set up Database Connection (PostgreSQL)
+  - [x] Configure SQLAlchemy
+  - [x] Create database migrations (Alembic)
 
 #### Phase 2: API Development
 - [ ] Implement Extension Request API
