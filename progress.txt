@@ -12,3 +12,4 @@ Notes:
   - flake8: PASSED
   - radon cc: PASSED (All A)
   - pydeps: FAILED (missing graphviz/dot), skipping gate.
+- Ockham Protocol (2025-05-18): Verified complexity < 8 (Highest: 1). NO_ACTION_REQUIRED.
