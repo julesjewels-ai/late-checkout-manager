@@ -1,11 +1,14 @@
-Task: Implement Core Domain Models
+Task: Set up Database Connection (PostgreSQL)
 Status: Completed
-Current Action: Defined and verified User, Booking, and ExtensionRequest models.
-Next Action: Set up Database Connection (PostgreSQL).
+Current Action: Configured SQLAlchemy, Alembic, and ORM models.
+Next Action: Implement Extension Request API.
 Notes:
-- Added `email-validator` to `requirements.txt`.
-- Implemented Pydantic models in `src/late_checkout/domain/models.py`.
-- Created unit tests in `tests/test_domain_models.py`.
+- Added `pydantic-settings` to `requirements.txt`.
+- Created `src/late_checkout/core/config.py` for settings.
+- Created `src/late_checkout/core/database.py` for SQLAlchemy engine.
+- Created `src/late_checkout/models.py` for ORM models.
+- Initialized and configured Alembic.
+- Added tests in `tests/test_database.py`.
 - Verified:
   - pytest: PASSED (100% on new tests)
   - mypy: PASSED (Zero Errors)
