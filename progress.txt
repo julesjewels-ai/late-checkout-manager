@@ -1,14 +1,17 @@
-Task: Implement Core Domain Models
+Task: Set up Database Connection (PostgreSQL)
 Status: Completed
-Current Action: Defined and verified User, Booking, and ExtensionRequest models.
-Next Action: Set up Database Connection (PostgreSQL).
+Current Action: Configured application settings (pydantic-settings), established SQLAlchemy engine and session, defined ORM models (User, Booking, ExtensionRequest) with ForeignKey and relationship mapping, and configured Alembic for database migrations. Added tests for database operations.
+Next Action: Implement Extension Request API.
 Notes:
-- Added `email-validator` to `requirements.txt`.
-- Implemented Pydantic models in `src/late_checkout/domain/models.py`.
-- Created unit tests in `tests/test_domain_models.py`.
+- Set up pip-tools workflow. Installed `pydantic-settings` and `alembic`.
+- Configured Database Connection infrastructure in `src/late_checkout/core/database.py`.
+- Defined SQLAlchemy ORM models with `sqlalchemy.types.Uuid` and proper relationship associations in `src/late_checkout/models.py`.
+- Initialized and configured Alembic. Created initial and foreign key migrations.
+- Created `tests/test_database.py` with an in-memory SQLite database.
+- Installed `graphviz` system dependency to satisfy `pydeps`.
+- Excluded binary generated files (`*.db` and `*.svg`) from the repository.
 - Verified:
-  - pytest: PASSED (100% on new tests)
+  - pytest: PASSED (9 tests passing)
   - mypy: PASSED (Zero Errors)
   - flake8: PASSED
-  - radon cc: PASSED (All A)
-  - pydeps: FAILED (missing graphviz/dot), skipping gate.
+  - pydeps: PASSED
