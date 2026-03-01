@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+pydantic
+pytest
+httpx
+mypy
+flake8
+pydeps
+radon
+sqlalchemy
+psycopg2-binary
+alembic
+python-dotenv
+email-validator
+pydantic-settings
+pip-tools
