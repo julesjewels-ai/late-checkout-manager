@@ -7,7 +7,7 @@
 ### Tasks
 
 #### Phase 1: Initialization & Core Setup
-- [x] Initialize Project Structure (Current Task)
+- [x] Initialize Project Structure
   - [x] Create `src/late_checkout/`, `tests/` structure
   - [x] Create `.gitignore`, `requirements.txt`, `pyproject.toml`, `setup.cfg`
   - [x] Create basic `main.py` app
@@ -21,10 +21,10 @@
   - [x] Create database migrations (Alembic)
 
 #### Phase 2: API Development
-- [ ] Implement Extension Request API (Current Task)
-  - [ ] Create endpoints for creating requests
-  - [ ] Create endpoints for viewing requests
-- [ ] Implement Pricing Logic
+- [x] Implement Extension Request API
+  - [x] Create endpoints for creating requests
+  - [x] Create endpoints for viewing requests
+- [ ] Implement Pricing Logic (Current Task)
   - [ ] Create dynamic pricing service
 - [ ] Implement Payment Integration (Stripe)
   - [ ] Create payment intent
