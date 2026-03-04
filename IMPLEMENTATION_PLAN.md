@@ -21,10 +21,10 @@
   - [x] Create database migrations (Alembic)
 
 #### Phase 2: API Development
-- [ ] Implement Extension Request API (Current Task)
-  - [ ] Create endpoints for creating requests
-  - [ ] Create endpoints for viewing requests
-- [ ] Implement Pricing Logic
+- [x] Implement Extension Request API (Completed)
+  - [x] Create endpoints for creating requests
+  - [x] Create endpoints for viewing requests
+- [ ] Implement Pricing Logic (Current Task)
   - [ ] Create dynamic pricing service
 - [ ] Implement Payment Integration (Stripe)
   - [ ] Create payment intent

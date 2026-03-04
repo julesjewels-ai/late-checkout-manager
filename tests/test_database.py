@@ -1,26 +1,7 @@
 from datetime import datetime, timezone
-import pytest
 from sqlalchemy.orm import Session
-from typing import Generator
 
-from late_checkout.core.database import Base, SessionLocal, engine
 from late_checkout.models import User, Booking, ExtensionRequest
-
-
-@pytest.fixture(scope="module")
-def setup_database() -> Generator[None, None, None]:
-    Base.metadata.create_all(bind=engine)
-    yield
-    Base.metadata.drop_all(bind=engine)
-
-
-@pytest.fixture
-def db_session(setup_database: None) -> Generator[Session, None, None]:
-    session = SessionLocal()
-    try:
-        yield session
-    finally:
-        session.close()
 
 
 def test_database_connection(db_session: Session) -> None:
