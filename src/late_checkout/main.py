@@ -1,7 +1,11 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from late_checkout.api.routers import extensions
+
 app = FastAPI(title="Late Checkout API")
+
+app.include_router(extensions.router)
 
 
 class Message(BaseModel):

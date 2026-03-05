@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 plugins = ["pydantic.mypy"]
 mypy_path = "src"
 explicit_package_bases = true
+namespace_packages = true
 disallow_untyped_defs = true
 check_untyped_defs = true
 ignore_missing_imports = true
