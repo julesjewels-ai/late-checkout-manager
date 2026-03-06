@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from src.late_checkout.main import app
+from late_checkout.main import app
 
 client = TestClient(app)
 
