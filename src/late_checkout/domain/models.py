@@ -25,3 +25,16 @@ class ExtensionRequest(BaseModel):
     requested_time: datetime
     status: str = Field(default="pending")
     price_quote: Optional[float] = None
+
+
+class ExtensionRequestCreate(BaseModel):
+    booking_id: UUID
+    requested_time: datetime
+
+
+class ExtensionRequestResponse(BaseModel):
+    id: UUID
+    booking_id: UUID
+    requested_time: datetime
+    status: str
+    price_quote: Optional[float] = None
