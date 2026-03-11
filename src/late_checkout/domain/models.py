@@ -19,7 +19,14 @@ class Booking(BaseModel):
     status: str = Field(default="active")
 
 
+class ExtensionRequestCreate(BaseModel):
+    booking_id: UUID
+    requested_time: datetime
+
+
 class ExtensionRequest(BaseModel):
+    model_config = {"from_attributes": True}
+
     id: UUID
     booking_id: UUID
     requested_time: datetime
