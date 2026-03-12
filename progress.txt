@@ -1,16 +1,19 @@
-Task: Set up Database Connection (PostgreSQL)
+Task: Implement Extension Request API
 Status: Completed
-Current Action: Configured SQLAlchemy, Alembic, and ORM models.
-Next Action: Implement Extension Request API.
+Current Action: Implemented endpoints, service layer, and DTOs for Extension Requests.
+Next Action: Implement Pricing Logic.
 Notes:
-- Added `pydantic-settings` to `requirements.in` and compiled.
-- Configured DB connection in `src/late_checkout/core/config.py` and `database.py`.
-- Defined ORM models in `src/late_checkout/models.py`.
-- Set up Alembic migrations in `alembic/`.
-- Written integration tests in `tests/test_database.py`.
+- Designed Clean Architecture:
+  - Domain layer DTO (`ExtensionRequestCreate`) in `src/late_checkout/domain/models.py` with Pydantic validation.
+  - Service layer logic (`ExtensionService`) in `src/late_checkout/services/extension.py` with SQLAlchemy integration.
+  - API Routers (`create_extension_request`, `get_extension_request`) in `src/late_checkout/api/routers/extension_requests.py` relying on dependencies.
+- Added dependencies provider in `src/late_checkout/api/dependencies.py` for DB session and Service instance.
+- Mounted extension-requests router in `src/late_checkout/main.py`.
+- Integrated SQLAlchemy SQLite setup with `StaticPool` to fix thread memory sharing issues during tests.
+- Formatted all codebase files using Black.
 - Verified validation gates:
   - pytest: PASSED
   - mypy: PASSED
   - flake8: PASSED
   - radon cc: PASSED
-  - pydeps: PASSED (installed graphviz)
+  - pydeps: PASSED
