@@ -27,3 +27,8 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# Media and Data
+*.mp4
+*.db
+*.svg
