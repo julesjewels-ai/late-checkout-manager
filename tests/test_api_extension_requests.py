@@ -92,6 +92,24 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+    # The price should be around 40 for 2 hours ($20/hr)
+    assert data["price_quote"] is not None
+    assert 39.0 <= data["price_quote"] <= 41.0
+
+
+def test_create_extension_request_invalid_time(
+    client: TestClient, test_booking: uuid.UUID
+) -> None:
+    requested_time = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    assert "Requested extension time must be after" in response.json()["detail"]
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
