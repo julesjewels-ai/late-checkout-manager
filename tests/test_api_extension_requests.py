@@ -13,7 +13,6 @@ from late_checkout.core.database import Base
 from late_checkout.api.routers.extension_requests import get_db
 from late_checkout.models import User, Booking
 
-
 # Setup an in-memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
@@ -79,7 +78,10 @@ def test_booking(db_session: Session) -> uuid.UUID:
 def test_create_extension_request_success(
     client: TestClient, test_booking: uuid.UUID
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    # 2.5 hours should round up to 3 chargeable hours. 3 * 20 = 60.0
+    requested_time = (
+        datetime.now(timezone.utc) + timedelta(hours=2, minutes=30)
+    ).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -91,7 +93,53 @@ def test_create_extension_request_success(
     data = response.json()
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
+    assert data["price_quote"] == 60.0
     assert "id" in data
+
+
+def test_create_extension_request_invalid_time_past(
+    client: TestClient, test_booking: uuid.UUID
+) -> None:
+    # Requested time in the past
+    requested_time = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    data = response.json()
+    assert "Requested extension time must be in the future" in data["detail"]
+
+
+def test_create_extension_request_invalid_time_before_checkout(
+    client: TestClient, db_session: Session, test_booking: uuid.UUID
+) -> None:
+    # Original checkout is far in the future
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    if booking:
+        booking.original_checkout = datetime.now(timezone.utc) + timedelta(
+            days=2
+        )  # type: ignore
+        db_session.commit()
+
+    # Requested time is in the future, but BEFORE the original checkout
+    requested_time = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    data = response.json()
+    assert (
+        "Requested time must be after original checkout time"
+        in data["detail"]
+    )
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
