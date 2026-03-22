@@ -11,6 +11,7 @@ from late_checkout.core.services import (
     get_extension_requests,
     BookingNotFoundError,
 )
+from late_checkout.core.pricing import PricingService, InvalidRequestedTimeError
 
 
 def get_db() -> Session:  # type: ignore
@@ -21,18 +22,26 @@ def get_db() -> Session:  # type: ignore
         db.close()
 
 
+def get_pricing_service() -> PricingService:
+    return PricingService()
+
+
 router = APIRouter(prefix="/extension-requests", tags=["Extension Requests"])
 
 
 @router.post("/", response_model=ExtensionRequestResponse, status_code=201)
 def create_request(
-    request_data: ExtensionRequestCreate, db: Session = Depends(get_db)
+    request_data: ExtensionRequestCreate,
+    db: Session = Depends(get_db),
+    pricing_service: PricingService = Depends(get_pricing_service),
 ) -> ExtensionRequestResponse:
     try:
-        new_request = create_extension_request(db, request_data)
+        new_request = create_extension_request(db, request_data, pricing_service)
         return ExtensionRequestResponse.model_validate(new_request)
     except BookingNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except InvalidRequestedTimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/", response_model=List[ExtensionRequestResponse])
