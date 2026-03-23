@@ -13,7 +13,6 @@ from late_checkout.core.database import Base
 from late_checkout.api.routers.extension_requests import get_db
 from late_checkout.models import User, Booking
 
-
 # Setup an in-memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
@@ -92,6 +91,41 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+
+
+def test_calculate_extension_price_rounding(
+    client: TestClient, test_booking: uuid.UUID
+) -> None:
+    # 2.5 hours should round up to 3 hours (* $20 = $60)
+    requested_time = (
+        datetime.now(timezone.utc) + timedelta(hours=2, minutes=30)
+    ).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert data["price_quote"] == 60.0
+
+
+def test_invalid_requested_time_raises_400(
+    client: TestClient, test_booking: uuid.UUID
+) -> None:
+    # Past date
+    past_time = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": past_time,
+        },
+    )
+    assert response.status_code == 400
+    assert "Requested time must be in the future" in response.json()["detail"]
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:

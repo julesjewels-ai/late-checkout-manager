@@ -50,18 +50,12 @@ def test_create_booking_and_extension(db_session: Session) -> None:
     db_session.commit()
 
     now = datetime.now(timezone.utc)
-    booking = Booking(
-        user_id=user.id,
-        room_number="101",
-        original_checkout=now
-    )
+    booking = Booking(user_id=user.id, room_number="101", original_checkout=now)
     db_session.add(booking)
     db_session.commit()
 
     extension = ExtensionRequest(
-        booking_id=booking.id,
-        requested_time=now,
-        price_quote=50.0
+        booking_id=booking.id, requested_time=now, price_quote=50.0
     )
     db_session.add(extension)
     db_session.commit()
