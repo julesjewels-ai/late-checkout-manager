@@ -79,7 +79,11 @@ def test_booking(db_session: Session) -> uuid.UUID:
 def test_create_extension_request_success(
     client: TestClient, test_booking: uuid.UUID
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    # Use an explicit exact time for testing the pricing math
+    # Booking original_checkout is set to `now` in the fixture
+    # We will request exactly 2.5 hours later, which should round up to 3 hours
+    now = datetime.now(timezone.utc)
+    requested_time = (now + timedelta(hours=2, minutes=30)).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -92,6 +96,24 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+
+    # Base rate is 20/hour. 2.5 hours rounds up to 3 hours. 3 * 20 = 60.0.
+    assert data["price_quote"] == 60.0
+
+
+def test_create_extension_request_past_time(
+    client: TestClient, test_booking: uuid.UUID
+) -> None:
+    requested_time = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Requested time must be in the future"
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
