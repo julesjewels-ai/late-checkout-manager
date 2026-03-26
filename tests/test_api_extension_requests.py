@@ -63,11 +63,12 @@ def test_booking(db_session: Session) -> uuid.UUID:
     db_session.commit()
     db_session.refresh(user)
 
-    # Create test booking
+    # Create test booking with original checkout in the past relative to tests
+    now = datetime.now(timezone.utc)
     booking = Booking(
         user_id=user.id,
         room_number="101",
-        original_checkout=datetime.now(timezone.utc),
+        original_checkout=now - timedelta(hours=1),
         status="active",
     )
     db_session.add(booking)
@@ -79,7 +80,9 @@ def test_booking(db_session: Session) -> uuid.UUID:
 def test_create_extension_request_success(
     client: TestClient, test_booking: uuid.UUID
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    # requested time is 2.5 hours from now, and 3.5 hours from original checkout
+    now = datetime.now(timezone.utc)
+    requested_time = (now + timedelta(hours=2, minutes=30)).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -92,6 +95,63 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+    assert data["price_quote"] == 80.0  # 3.5 hours rounded up = 4 hours * $20
+
+
+def test_create_extension_request_past_date(
+    client: TestClient, test_booking: uuid.UUID
+) -> None:
+    past_time = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": past_time,
+        },
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Requested time must be in the future"
+
+
+def test_create_extension_request_before_checkout(
+    db_session: Session, client: TestClient
+) -> None:
+    # Create test user
+    user = User(
+        name="Test User 2",
+        email=f"test{uuid.uuid4()}@example.com",
+        role="guest",
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+
+    now = datetime.now(timezone.utc)
+    # Create test booking with checkout in the future
+    booking = Booking(
+        user_id=user.id,
+        room_number="102",
+        original_checkout=now + timedelta(hours=5),
+        status="active",
+    )
+    db_session.add(booking)
+    db_session.commit()
+    db_session.refresh(booking)
+
+    # Request extension that is in the future but before original checkout
+    requested_time = (now + timedelta(hours=2)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(booking.id),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    assert (
+        response.json()["detail"]
+        == "Requested time must be after original checkout time"
+    )
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
