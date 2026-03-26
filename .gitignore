@@ -23,6 +23,9 @@ htmlcov/
 .vscode/
 .idea/
 
+# Diagrams
+*.svg
+
 # Distribution
 dist/
 build/
