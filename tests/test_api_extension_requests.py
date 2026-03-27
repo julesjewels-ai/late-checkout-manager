@@ -52,7 +52,12 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
 
 
 @pytest.fixture(scope="function")
-def test_booking(db_session: Session) -> uuid.UUID:
+def fixed_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+@pytest.fixture(scope="function")
+def test_booking(db_session: Session, fixed_now: datetime) -> uuid.UUID:
     # Create test user
     user = User(
         name="Test User",
@@ -67,7 +72,7 @@ def test_booking(db_session: Session) -> uuid.UUID:
     booking = Booking(
         user_id=user.id,
         room_number="101",
-        original_checkout=datetime.now(timezone.utc),
+        original_checkout=fixed_now,
         status="active",
     )
     db_session.add(booking)
@@ -77,9 +82,10 @@ def test_booking(db_session: Session) -> uuid.UUID:
 
 
 def test_create_extension_request_success(
-    client: TestClient, test_booking: uuid.UUID
+    client: TestClient, test_booking: uuid.UUID, fixed_now: datetime
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    # 2 hours after the test_booking's original_checkout
+    requested_time = (fixed_now + timedelta(hours=2)).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -92,11 +98,31 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+    assert "price_quote" in data
+    assert data["price_quote"] == 40.0  # 2 hours * $20
 
 
-def test_create_extension_request_not_found(client: TestClient) -> None:
+def test_create_extension_request_invalid_time(
+    client: TestClient, test_booking: uuid.UUID, fixed_now: datetime
+) -> None:
+    # Requesting a time in the past
+    requested_time = (fixed_now - timedelta(hours=1)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    assert "Requested time must be in the future" in response.json()["detail"]
+
+
+def test_create_extension_request_not_found(
+    client: TestClient, fixed_now: datetime
+) -> None:
     fake_id = str(uuid.uuid4())
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    requested_time = (fixed_now + timedelta(hours=2)).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -108,9 +134,11 @@ def test_create_extension_request_not_found(client: TestClient) -> None:
     assert response.json()["detail"] == f"Booking {fake_id} not found"
 
 
-def test_get_extension_requests(client: TestClient, test_booking: uuid.UUID) -> None:
+def test_get_extension_requests(
+    client: TestClient, test_booking: uuid.UUID, fixed_now: datetime
+) -> None:
     # First create a request
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    requested_time = (fixed_now + timedelta(hours=2)).isoformat()
     create_response = client.post(
         "/extension-requests/",
         json={
