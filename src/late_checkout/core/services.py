@@ -1,3 +1,5 @@
+import math
+from datetime import datetime, timezone
 from typing import List
 from uuid import UUID
 
@@ -11,6 +13,32 @@ class BookingNotFoundError(Exception):
     pass
 
 
+class InvalidRequestedTimeError(Exception):
+    pass
+
+
+def calculate_extension_price(
+    original_checkout: datetime, requested_time: datetime
+) -> float:
+    # Ensure datetimes are timezone aware for comparison
+    if original_checkout.tzinfo is None:
+        original_checkout = original_checkout.replace(tzinfo=timezone.utc)
+    if requested_time.tzinfo is None:
+        requested_time = requested_time.replace(tzinfo=timezone.utc)
+
+    if requested_time <= original_checkout:
+        raise InvalidRequestedTimeError(
+            "Requested time must be after the original checkout time."
+        )
+
+    time_diff = requested_time - original_checkout
+    hours_diff = time_diff.total_seconds() / 3600
+
+    # Base rate $20/hour, round up to next whole hour
+    price = math.ceil(hours_diff) * 20.0
+    return price
+
+
 def create_extension_request(
     db: Session, request_data: ExtensionRequestCreate
 ) -> ExtensionRequest:
@@ -19,11 +47,17 @@ def create_extension_request(
     if not booking:
         raise BookingNotFoundError(f"Booking {request_data.booking_id} not found")
 
+    price_quote = calculate_extension_price(
+        original_checkout=booking.original_checkout,  # type: ignore
+        requested_time=request_data.requested_time,
+    )
+
     # Create extension request
     new_request = ExtensionRequest(
         booking_id=request_data.booking_id,
         requested_time=request_data.requested_time,
         status="pending",
+        price_quote=price_quote,
     )
     db.add(new_request)
     db.commit()
