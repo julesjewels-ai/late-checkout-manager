@@ -79,7 +79,7 @@ def test_booking(db_session: Session) -> uuid.UUID:
 def test_create_extension_request_success(
     client: TestClient, test_booking: uuid.UUID
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2.5)).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -92,6 +92,23 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+    # 2.5 hours rounded up is 3 hours * $20 = 60.0
+    assert data["price_quote"] == 60.0
+
+
+def test_create_extension_request_invalid_time(
+    client: TestClient, test_booking: uuid.UUID
+) -> None:
+    requested_time = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    assert "Requested time must be after" in response.json()["detail"]
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
