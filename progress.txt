@@ -1,16 +1,15 @@
-Task: Implement Extension Request API
+Task: Implement Pricing Logic
 Status: Completed
-Current Action: Implemented schemas, services, and routers for extension requests.
-Next Action: Implement Pricing Logic.
+Current Action: Implemented `calculate_extension_price` logic and integrated it with extension request creation.
+Next Action: Implement Payment Integration (Stripe).
 Notes:
-- Created Pydantic DTOs for create and response schemas in `src/late_checkout/api/schemas.py`.
-- Added business logic service layer in `src/late_checkout/core/services.py` with DB dependency injection.
-- Created `APIRouter` in `src/late_checkout/api/routers/extension_requests.py` for POST and GET.
-- Registered the new router in `src/late_checkout/main.py`.
-- Created integration tests in `tests/test_api_extension_requests.py` using `FastAPI TestClient` and in-memory DB override.
+- Added `calculate_extension_price` to `src/late_checkout/core/services.py` calculating dynamic pricing at $20/hour, rounding partial hours up.
+- Created `InvalidRequestedTimeError` for invalid dates (past dates or before original checkout).
+- Caught `InvalidRequestedTimeError` in API router to return 400 Bad Request.
+- Ensured timezone awareness in calculations to prevent SQLite naive datetime crashes.
+- Added thorough test coverage in `tests/test_pricing.py` and updated `tests/test_api_extension_requests.py` for new `price_quote` assertion.
 - Verified validation gates:
   - pytest: PASSED
   - mypy .: PASSED
-  - flake8 .: PASSED
-  - radon cc .: PASSED
-  - pydeps . --nodot: PASSED
+  - flake8 .: PASSED (with black formatting)
+  - pydeps . & radon cc .: PASSED (Complexity < 8, no architectural violations)
