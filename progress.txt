@@ -1,16 +1,10 @@
-Task: Implement Extension Request API
+Task: Implement Pricing Logic
 Status: Completed
-Current Action: Implemented schemas, services, and routers for extension requests.
-Next Action: Implement Pricing Logic.
+Current Action: Implemented `calculate_price_quote` and updated extension request creation to compute and store price quotes.
+Next Action: Implement Payment Integration (Stripe).
 Notes:
-- Created Pydantic DTOs for create and response schemas in `src/late_checkout/api/schemas.py`.
-- Added business logic service layer in `src/late_checkout/core/services.py` with DB dependency injection.
-- Created `APIRouter` in `src/late_checkout/api/routers/extension_requests.py` for POST and GET.
-- Registered the new router in `src/late_checkout/main.py`.
-- Created integration tests in `tests/test_api_extension_requests.py` using `FastAPI TestClient` and in-memory DB override.
-- Verified validation gates:
-  - pytest: PASSED
-  - mypy .: PASSED
-  - flake8 .: PASSED
-  - radon cc .: PASSED
-  - pydeps . --nodot: PASSED
+- Added `calculate_price_quote` in `src/late_checkout/core/services.py` that calculates the hours elapsed rounded up times 20, ensuring `requested_time` is strictly after `original_checkout` and after `now`.
+- Custom `InvalidRequestedTimeError` added to services and mapped to a 400 Bad Request exception in `src/late_checkout/api/routers/extension_requests.py`.
+- Updated test fixtures in `tests/test_api_extension_requests.py` to use a consistent `base_time` fixture to prevent millisecond drift across logic and assertions.
+- Added edge case tests for valid times, times in the past, and times before checkout time.
+- All validation gates ran successfully (pytest, mypy, flake8, radon, pydeps).
