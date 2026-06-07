@@ -1,13 +1,12 @@
-Task: Implement Extension Request API
+Task: Implement Pricing Logic
 Status: Completed
-Current Action: Implemented schemas, services, and routers for extension requests.
-Next Action: Implement Pricing Logic.
+Current Action: Implemented `calculate_extension_price`, updated services/routers, and passed all tests.
+Next Action: Implement Payment Integration (Stripe).
 Notes:
-- Created Pydantic DTOs for create and response schemas in `src/late_checkout/api/schemas.py`.
-- Added business logic service layer in `src/late_checkout/core/services.py` with DB dependency injection.
-- Created `APIRouter` in `src/late_checkout/api/routers/extension_requests.py` for POST and GET.
-- Registered the new router in `src/late_checkout/main.py`.
-- Created integration tests in `tests/test_api_extension_requests.py` using `FastAPI TestClient` and in-memory DB override.
+- Created pricing logic in `src/late_checkout/core/pricing.py`.
+- Rounded up hours using `math.ceil` and applied $20/hr base rate.
+- Added validation for timezone-aware datetimes and ensured requested time is strictly after the original checkout, raising `InvalidRequestedTimeError` (400 Bad Request).
+- Overcame test flakiness by pulling the `original_checkout` dynamically from the db session rather than creating a disconnected `now` timestamp.
 - Verified validation gates:
   - pytest: PASSED
   - mypy .: PASSED
