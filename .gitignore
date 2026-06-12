@@ -27,3 +27,7 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+*.mp4
+*.mkv
+*.avi
+*.webm
