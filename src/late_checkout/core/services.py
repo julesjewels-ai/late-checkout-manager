@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+import math
 from typing import List
 from uuid import UUID
 
@@ -11,6 +13,10 @@ class BookingNotFoundError(Exception):
     pass
 
 
+class InvalidRequestedTimeError(Exception):
+    pass
+
+
 def create_extension_request(
     db: Session, request_data: ExtensionRequestCreate
 ) -> ExtensionRequest:
@@ -19,11 +25,30 @@ def create_extension_request(
     if not booking:
         raise BookingNotFoundError(f"Booking {request_data.booking_id} not found")
 
+    requested_time = request_data.requested_time
+    if requested_time.tzinfo is None:
+        requested_time = requested_time.replace(tzinfo=timezone.utc)
+
+    original_checkout = booking.original_checkout
+    if original_checkout.tzinfo is None:
+        original_checkout = original_checkout.replace(tzinfo=timezone.utc)
+
+    now = datetime.now(timezone.utc)
+
+    if requested_time <= now or requested_time <= original_checkout:
+        raise InvalidRequestedTimeError(
+            "Requested time must be in the future and after original checkout"
+        )
+
+    hours_diff = math.ceil((requested_time - original_checkout).total_seconds() / 3600)
+    price_quote = hours_diff * 20.0
+
     # Create extension request
     new_request = ExtensionRequest(
         booking_id=request_data.booking_id,
-        requested_time=request_data.requested_time,
+        requested_time=requested_time,
         status="pending",
+        price_quote=price_quote,
     )
     db.add(new_request)
     db.commit()
