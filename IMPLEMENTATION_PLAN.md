@@ -7,26 +7,16 @@
 ### Tasks
 
 #### Phase 1: Initialization & Core Setup
-- [x] Initialize Project Structure (Current Task)
-  - [x] Create `src/late_checkout/`, `tests/` structure
-  - [x] Create `.gitignore`, `requirements.txt`, `pyproject.toml`, `setup.cfg`
-  - [x] Create basic `main.py` app
-  - [x] Verify validation gates (`pytest`, `mypy`, `flake8`, `pydeps`, `radon`)
+- [x] Initialize Project Structure
 - [x] Implement Core Domain Models
-  - [x] Define User model
-  - [x] Define Booking model
-  - [x] Define ExtensionRequest model
 - [x] Set up Database Connection (PostgreSQL)
-  - [x] Configure SQLAlchemy
-  - [x] Create database migrations (Alembic)
 
 #### Phase 2: API Development
-- [x] Implement Extension Request API (Current Task)
-  - [x] Create endpoints for creating requests
-  - [x] Create endpoints for viewing requests
-- [ ] Implement Pricing Logic
-  - [ ] Create dynamic pricing service
-- [ ] Implement Payment Integration (Stripe)
+- [x] Implement Extension Request API
+- [x] Implement Pricing Logic
+  - [x] Create dynamic pricing calculation based on hours elapsed
+  - [x] Implement rigorous datetime validation
+- [ ] Implement Payment Integration (Stripe) (Current Task)
   - [ ] Create payment intent
   - [ ] Handle webhook events
 
@@ -46,5 +36,5 @@
 - [x] Unit Tests: `pytest` (Must Pass)
 - [x] Type Check: `mypy .` (Must Pass - Zero Errors)
 - [x] Linting: `flake8 .` (Must Pass)
-- [x] Coupling: `pydeps . --nodot` (Check for architectural violations)
+- [x] Coupling: `pydeps .` (Check for architectural violations)
 - [x] Complexity: `radon cc .` (Ensure complexity < 8)
