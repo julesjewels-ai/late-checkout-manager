@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from late_checkout.api.schemas import ExtensionRequestCreate, ExtensionRequestResponse
 from late_checkout.core.database import SessionLocal
+from late_checkout.core.pricing import InvalidRequestedTimeError
 from late_checkout.core.services import (
     create_extension_request,
     get_extension_requests,
@@ -33,6 +34,8 @@ def create_request(
         return ExtensionRequestResponse.model_validate(new_request)
     except BookingNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except InvalidRequestedTimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/", response_model=List[ExtensionRequestResponse])
