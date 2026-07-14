@@ -10,6 +10,7 @@ from late_checkout.core.services import (
     create_extension_request,
     get_extension_requests,
     BookingNotFoundError,
+    InvalidExtensionTimeError,
 )
 
 
@@ -33,6 +34,8 @@ def create_request(
         return ExtensionRequestResponse.model_validate(new_request)
     except BookingNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except InvalidExtensionTimeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/", response_model=List[ExtensionRequestResponse])
