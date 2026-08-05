@@ -7,7 +7,15 @@ from late_checkout.api.schemas import ExtensionRequestCreate
 from late_checkout.models import Booking, ExtensionRequest
 
 
+import math
+from datetime import datetime, timezone
+
+
 class BookingNotFoundError(Exception):
+    pass
+
+
+class InvalidRequestedTimeError(Exception):
     pass
 
 
@@ -19,11 +27,32 @@ def create_extension_request(
     if not booking:
         raise BookingNotFoundError(f"Booking {request_data.booking_id} not found")
 
+    req_time_naive = request_data.requested_time.astimezone(timezone.utc).replace(
+        tzinfo=None
+    )
+    now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
+    orig_checkout_naive = booking.original_checkout.astimezone(timezone.utc).replace(
+        tzinfo=None
+    )
+
+    if req_time_naive <= now_naive:
+        raise InvalidRequestedTimeError("Requested time must be in the future")
+    if req_time_naive <= orig_checkout_naive:
+        raise InvalidRequestedTimeError(
+            "Requested time must be after original checkout"
+        )
+
+    hours_diff = math.ceil(
+        (req_time_naive - orig_checkout_naive).total_seconds() / 3600
+    )
+    price_quote = hours_diff * 20.0
+
     # Create extension request
     new_request = ExtensionRequest(
         booking_id=request_data.booking_id,
         requested_time=request_data.requested_time,
         status="pending",
+        price_quote=price_quote,
     )
     db.add(new_request)
     db.commit()
