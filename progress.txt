@@ -14,3 +14,5 @@ Notes:
   - flake8 .: PASSED
   - radon cc .: PASSED
   - pydeps . --nodot: PASSED
+Implemented zero-maintenance security pipeline (dependabot, github actions workflow, strict requirements.txt) per Aegis protocol
+Fixed CI failures: added GITHUB_TOKEN to gitleaks and upgraded dependencies to fix pip-audit vulnerabilities
