@@ -13,7 +13,6 @@ from late_checkout.core.database import Base
 from late_checkout.api.routers.extension_requests import get_db
 from late_checkout.models import User, Booking
 
-
 # Setup an in-memory SQLite database for testing
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
@@ -67,7 +66,7 @@ def test_booking(db_session: Session) -> uuid.UUID:
     booking = Booking(
         user_id=user.id,
         room_number="101",
-        original_checkout=datetime.now(timezone.utc),
+        original_checkout=datetime.now(timezone.utc).replace(tzinfo=None),
         status="active",
     )
     db_session.add(booking)
@@ -79,7 +78,9 @@ def test_booking(db_session: Session) -> uuid.UUID:
 def test_create_extension_request_success(
     client: TestClient, test_booking: uuid.UUID
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    requested_time = (
+        datetime.now(timezone.utc) + timedelta(hours=1, minutes=59)
+    ).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -91,6 +92,8 @@ def test_create_extension_request_success(
     data = response.json()
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
+    assert "price_quote" in data
+    assert data["price_quote"] == 40.0  # 2 hours * 20
     assert "id" in data
 
 
