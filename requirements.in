@@ -16,5 +16,5 @@ pydantic-settings
 pip-tools
 tensorflow
 opencv-python
-Pillow
+Pillow>=12.3.0
 moviepy
