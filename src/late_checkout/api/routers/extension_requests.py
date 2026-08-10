@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from late_checkout.api.schemas import ExtensionRequestCreate, ExtensionRequestResponse
 from late_checkout.core.database import SessionLocal
+from late_checkout.core.pricing import PricingService, get_pricing_service
 from late_checkout.core.services import (
     create_extension_request,
     get_extension_requests,
@@ -26,10 +27,12 @@ router = APIRouter(prefix="/extension-requests", tags=["Extension Requests"])
 
 @router.post("/", response_model=ExtensionRequestResponse, status_code=201)
 def create_request(
-    request_data: ExtensionRequestCreate, db: Session = Depends(get_db)
+    request_data: ExtensionRequestCreate,
+    db: Session = Depends(get_db),
+    pricing_service: PricingService = Depends(get_pricing_service),
 ) -> ExtensionRequestResponse:
     try:
-        new_request = create_extension_request(db, request_data)
+        new_request = create_extension_request(db, request_data, pricing_service)
         return ExtensionRequestResponse.model_validate(new_request)
     except BookingNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
