@@ -14,3 +14,6 @@ Notes:
   - flake8 .: PASSED
   - radon cc .: PASSED
   - pydeps . --nodot: PASSED
+Task: Implement Pricing Logic
+Status: Completed
+Notes: Created IPricingService and DynamicPricingService, injected into create_extension_request endpoint.
