@@ -67,7 +67,8 @@ def test_booking(db_session: Session) -> uuid.UUID:
     booking = Booking(
         user_id=user.id,
         room_number="101",
-        original_checkout=datetime.now(timezone.utc),
+        original_checkout=datetime.now(timezone.utc).replace(tzinfo=None)
+        + timedelta(hours=24),
         status="active",
     )
     db_session.add(booking)
@@ -79,7 +80,12 @@ def test_booking(db_session: Session) -> uuid.UUID:
 def test_create_extension_request_success(
     client: TestClient, test_booking: uuid.UUID
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    # Use naive offset to avoid millisecond exact rounding issues
+    requested_time = (
+        datetime.now(timezone.utc).replace(tzinfo=None)
+        + timedelta(hours=24)
+        + timedelta(hours=1, minutes=59)
+    ).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -91,12 +97,17 @@ def test_create_extension_request_success(
     data = response.json()
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
+    assert data["price_quote"] == 40.0
     assert "id" in data
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
     fake_id = str(uuid.uuid4())
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    requested_time = (
+        datetime.now(timezone.utc).replace(tzinfo=None)
+        + timedelta(hours=24)
+        + timedelta(hours=1, minutes=59)
+    ).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -110,7 +121,11 @@ def test_create_extension_request_not_found(client: TestClient) -> None:
 
 def test_get_extension_requests(client: TestClient, test_booking: uuid.UUID) -> None:
     # First create a request
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    requested_time = (
+        datetime.now(timezone.utc).replace(tzinfo=None)
+        + timedelta(hours=24)
+        + timedelta(hours=1, minutes=59)
+    ).isoformat()
     create_response = client.post(
         "/extension-requests/",
         json={
