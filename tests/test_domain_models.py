@@ -28,7 +28,7 @@ def test_booking_creation() -> None:
         id=booking_id,
         user_id=user_id,
         room_number="101",
-        original_checkout=original_checkout
+        original_checkout=original_checkout,
     )
     assert booking.id == booking_id
     assert booking.user_id == user_id
@@ -41,9 +41,7 @@ def test_extension_request_creation() -> None:
     booking_id = uuid.uuid4()
     requested_time = datetime.now() + timedelta(hours=2)
     request = ExtensionRequest(
-        id=request_id,
-        booking_id=booking_id,
-        requested_time=requested_time
+        id=request_id, booking_id=booking_id, requested_time=requested_time
     )
     assert request.id == request_id
     assert request.booking_id == booking_id
@@ -59,6 +57,6 @@ def test_extension_request_with_price() -> None:
         id=request_id,
         booking_id=booking_id,
         requested_time=requested_time,
-        price_quote=50.0
+        price_quote=50.0,
     )
     assert request.price_quote == 50.0
