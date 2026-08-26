@@ -1,16 +1,16 @@
-Task: Implement Extension Request API
+Task: Implement Pricing Logic
 Status: Completed
-Current Action: Implemented schemas, services, and routers for extension requests.
-Next Action: Implement Pricing Logic.
+Current Action: Implemented DynamicPricingService and integrated into API logic.
+Next Action: Implement Payment Integration (Stripe).
 Notes:
-- Created Pydantic DTOs for create and response schemas in `src/late_checkout/api/schemas.py`.
-- Added business logic service layer in `src/late_checkout/core/services.py` with DB dependency injection.
-- Created `APIRouter` in `src/late_checkout/api/routers/extension_requests.py` for POST and GET.
-- Registered the new router in `src/late_checkout/main.py`.
-- Created integration tests in `tests/test_api_extension_requests.py` using `FastAPI TestClient` and in-memory DB override.
+- Created `src/late_checkout/core/pricing.py` defining `IPricingService` and `DynamicPricingService`.
+- Logic calculates rate at $50.0/hr for time extension, ensuring timezone normalization to naive UTC to avoid test inconsistencies.
+- Included Guard Clause in pricing to reject requested times in the past (`InvalidRequestedTimeError`).
+- Injected `DynamicPricingService` into `create_extension_request` in `services.py` and handled HTTP 400 translation in router.
+- Updated unit tests `tests/test_api_extension_requests.py` to cover positive `price_quote` and invalid time 400 returns.
+- Updated `IMPLEMENTATION_PLAN.md` tasks.
 - Verified validation gates:
   - pytest: PASSED
-  - mypy .: PASSED
-  - flake8 .: PASSED
-  - radon cc .: PASSED
-  - pydeps . --nodot: PASSED
+  - mypy: PASSED
+  - flake8: PASSED
+  - pydeps: PASSED
