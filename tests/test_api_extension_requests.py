@@ -67,7 +67,7 @@ def test_booking(db_session: Session) -> uuid.UUID:
     booking = Booking(
         user_id=user.id,
         room_number="101",
-        original_checkout=datetime.now(timezone.utc),
+        original_checkout=datetime.now(timezone.utc).replace(tzinfo=None),
         status="active",
     )
     db_session.add(booking)
@@ -92,6 +92,22 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+    assert data["price_quote"] == 100.0
+
+
+def test_create_extension_request_invalid_time(
+    client: TestClient, test_booking: uuid.UUID
+) -> None:
+    requested_time = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    assert "after original checkout time" in response.json()["detail"]
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
