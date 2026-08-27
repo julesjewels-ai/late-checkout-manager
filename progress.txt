@@ -14,3 +14,8 @@ Notes:
   - flake8 .: PASSED
   - radon cc .: PASSED
   - pydeps . --nodot: PASSED
+
+Task: Implement Pricing Logic
+Status: Completed
+Next Action: Implement Payment Integration
+Notes: Created IPricingService, dynamic price calculation, injected into API routes, added validation for past times.
