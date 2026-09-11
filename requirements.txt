@@ -8,26 +8,30 @@ absl-py==2.5.0
     # via
     #   keras
     #   tensorflow
-alembic==1.13.1
+alembic==1.19.2
     # via -r requirements.in
-annotated-types==0.7.0
+annotated-doc==0.0.5
+    # via fastapi
+annotated-types==0.8.0
     # via pydantic
-anyio==4.12.1
+anyio==4.15.1
     # via
     #   httpx
     #   starlette
+ast-serialize==0.11.1
+    # via mypy
 astunparse==1.6.3
     # via tensorflow
-build==1.4.0
+build==1.6.1
     # via pip-tools
-certifi==2026.2.25
+certifi==2026.7.22
     # via
     #   httpcore
     #   httpx
     #   requests
 charset-normalizer==3.5.1
     # via requests
-click==8.3.1
+click==8.5.0
     # via
     #   pip-tools
     #   uvicorn
@@ -37,9 +41,9 @@ dnspython==2.8.0
     # via email-validator
 email-validator==2.3.0
     # via -r requirements.in
-fastapi==0.109.0
+fastapi==0.141.1
     # via -r requirements.in
-flake8==7.0.0
+flake8==7.3.0
     # via -r requirements.in
 flatbuffers==25.12.19
     # via tensorflow
@@ -47,7 +51,7 @@ gast==0.7.0
     # via tensorflow
 google-pasta==0.2.0
     # via tensorflow
-greenlet==3.3.2
+greenlet==3.5.5
     # via sqlalchemy
 grpcio==1.83.1
     # via tensorflow
@@ -61,9 +65,9 @@ h5py==3.14.0
     #   tensorflow
 httpcore==1.0.9
     # via httpx
-httpx==0.26.0
+httpx==0.28.1
     # via -r requirements.in
-idna==3.11
+idna==3.19
     # via
     #   anyio
     #   email-validator
@@ -75,7 +79,9 @@ keras==3.15.1
     # via tensorflow
 libclang==18.1.1
     # via tensorflow
-mako==1.3.10
+librt==0.15.0
+    # via mypy
+mako==1.4.1
     # via alembic
 mando==0.7.1
     # via radon
@@ -91,7 +97,7 @@ ml-dtypes==0.6.0
     # via
     #   keras
     #   tensorflow
-mypy==1.8.0
+mypy==2.3.1
     # via -r requirements.in
 mypy-extensions==1.1.0
     # via mypy
@@ -110,47 +116,51 @@ opt-einsum==3.4.0
     # via tensorflow
 optree==0.20.0
     # via keras
-packaging==26.0
+packaging==26.3
     # via
     #   build
     #   keras
     #   pytest
     #   tensorflow
     #   wheel
+pathspec==1.1.1
+    # via mypy
 pillow==12.3.0
     # via -r requirements.in
-pip-tools==7.5.3
+pip-tools==7.6.1
     # via -r requirements.in
 pluggy==1.6.0
     # via pytest
 protobuf==7.36.1
     # via tensorflow
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.13
     # via -r requirements.in
-pycodestyle==2.11.1
+pycodestyle==2.14.0
     # via flake8
-pydantic==2.6.0
+pydantic==2.13.5
     # via
     #   -r requirements.in
     #   fastapi
     #   pydantic-settings
-pydantic-core==2.16.1
+pydantic-core==2.46.5
     # via pydantic
-pydantic-settings==2.2.1
+pydantic-settings==2.15.0
     # via -r requirements.in
-pydeps==1.12.18
+pydeps==3.0.8
     # via -r requirements.in
-pyflakes==3.2.0
+pyflakes==3.4.0
     # via flake8
 pygments==2.21.0
-    # via rich
+    # via
+    #   pytest
+    #   rich
 pyproject-hooks==1.2.0
     # via
     #   build
     #   pip-tools
-pytest==8.0.0
+pytest==9.1.1
     # via -r requirements.in
-python-dotenv==1.0.1
+python-dotenv==1.2.3
     # via
     #   -r requirements.in
     #   pydantic-settings
@@ -166,13 +176,11 @@ six==1.17.0
     #   google-pasta
     #   mando
     #   tensorflow
-sniffio==1.3.1
-    # via httpx
-sqlalchemy==2.0.25
+sqlalchemy==2.0.52
     # via
     #   -r requirements.in
     #   alembic
-starlette==0.35.1
+starlette==1.6.0
     # via fastapi
 stdlib-list==0.12.0
     # via pydeps
@@ -180,7 +188,7 @@ tensorflow==2.21.0
     # via -r requirements.in
 termcolor==3.3.0
     # via tensorflow
-typing-extensions==4.15.0
+typing-extensions==4.16.0
     # via
     #   alembic
     #   anyio
@@ -191,12 +199,19 @@ typing-extensions==4.15.0
     #   pydantic
     #   pydantic-core
     #   sqlalchemy
+    #   starlette
     #   tensorflow
+    #   typing-inspection
+typing-inspection==0.4.4
+    # via
+    #   fastapi
+    #   pydantic
+    #   pydantic-settings
 urllib3==2.7.0
     # via requests
-uvicorn==0.27.0
+uvicorn==0.52.4
     # via -r requirements.in
-wheel==0.46.3
+wheel==0.48.0
     # via
     #   astunparse
     #   pip-tools
