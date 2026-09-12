@@ -14,3 +14,9 @@ Notes:
   - flake8 .: PASSED
   - radon cc .: PASSED
   - pydeps . --nodot: PASSED
+
+Task: Implement Pricing Logic
+Status: Completed
+Notes:
+- Added pricing service.
+- Integrated with extension requests.
