@@ -67,7 +67,7 @@ def test_booking(db_session: Session) -> uuid.UUID:
     booking = Booking(
         user_id=user.id,
         room_number="101",
-        original_checkout=datetime.now(timezone.utc),
+        original_checkout=datetime.now(timezone.utc).replace(tzinfo=None),
         status="active",
     )
     db_session.add(booking)
@@ -77,9 +77,10 @@ def test_booking(db_session: Session) -> uuid.UUID:
 
 
 def test_create_extension_request_success(
-    client: TestClient, test_booking: uuid.UUID
+    client: TestClient, test_booking: uuid.UUID, db_session: Session
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    requested_time = (booking.original_checkout + timedelta(hours=2)).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -91,12 +92,14 @@ def test_create_extension_request_success(
     data = response.json()
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
+    assert data["price_quote"] == 40.0
     assert "id" in data
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
     fake_id = str(uuid.uuid4())
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    future_time = datetime.now(timezone.utc) + timedelta(hours=2)
+    requested_time = future_time.replace(tzinfo=None).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -108,9 +111,30 @@ def test_create_extension_request_not_found(client: TestClient) -> None:
     assert response.json()["detail"] == f"Booking {fake_id} not found"
 
 
-def test_get_extension_requests(client: TestClient, test_booking: uuid.UUID) -> None:
+def test_create_extension_request_invalid_time(
+    client: TestClient, test_booking: uuid.UUID, db_session: Session
+) -> None:
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    requested_time = (booking.original_checkout - timedelta(hours=1)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    assert (
+        response.json()["detail"] == "Requested time must be after original checkout."
+    )
+
+
+def test_get_extension_requests(
+    client: TestClient, test_booking: uuid.UUID, db_session: Session
+) -> None:
     # First create a request
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    requested_time = (booking.original_checkout + timedelta(hours=2)).isoformat()
     create_response = client.post(
         "/extension-requests/",
         json={
