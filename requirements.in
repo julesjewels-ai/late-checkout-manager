@@ -1,7 +1,7 @@
-fastapi
+fastapi>=0.109.1
 uvicorn
 pydantic
-pytest
+pytest>=9.0.3
 httpx
 mypy
 flake8
@@ -10,10 +10,14 @@ radon
 sqlalchemy
 psycopg2-binary
 alembic
-python-dotenv
+python-dotenv>=1.2.2
 email-validator
 pydantic-settings
 pip-tools
 tensorflow
 opencv-python
 Pillow
+click>=8.3.3
+starlette>=1.3.1
+idna>=3.15
+mako>=1.3.12
