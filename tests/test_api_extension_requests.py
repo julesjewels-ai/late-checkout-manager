@@ -77,14 +77,22 @@ def test_booking(db_session: Session) -> uuid.UUID:
 
 
 def test_create_extension_request_success(
-    client: TestClient, test_booking: uuid.UUID
+    client: TestClient, db_session: Session, test_booking: uuid.UUID
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    assert booking is not None
+    safe_checkout = (
+        booking.original_checkout.replace(tzinfo=timezone.utc)
+        if booking.original_checkout.tzinfo is None
+        else booking.original_checkout.astimezone(timezone.utc)
+    )
+    requested_time = safe_checkout + timedelta(hours=2)
+
     response = client.post(
         "/extension-requests/",
         json={
             "booking_id": str(test_booking),
-            "requested_time": requested_time,
+            "requested_time": requested_time.isoformat(),
         },
     )
     assert response.status_code == 201
@@ -92,6 +100,31 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+    assert pytest.approx(data["price_quote"], rel=1e-2) == 2.0
+
+
+def test_create_extension_request_invalid_time(
+    client: TestClient, db_session: Session, test_booking: uuid.UUID
+) -> None:
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    assert booking is not None
+    safe_checkout = (
+        booking.original_checkout.replace(tzinfo=timezone.utc)
+        if booking.original_checkout.tzinfo is None
+        else booking.original_checkout.astimezone(timezone.utc)
+    )
+    requested_time = safe_checkout - timedelta(hours=1)
+
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time.isoformat(),
+        },
+    )
+    assert response.status_code == 400
+    expected_error = "Requested time must be after original checkout."
+    assert response.json()["detail"] == expected_error
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
