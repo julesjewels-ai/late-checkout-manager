@@ -1,8 +1,12 @@
-Task: Implement Extension Request API
+Task: Implement Pricing Logic
 Status: Completed
-Current Action: Implemented schemas, services, and routers for extension requests.
-Next Action: Implement Pricing Logic.
+Current Action: Implemented pricing logic with SCP GRASP security control (timestamp validation).
+Next Action: Implement Payment Integration (Stripe).
 Notes:
+- Executed SCP GRASP protocol via `message_user` prioritizing input validation for timestamps.
+- Created `DynamicPricingService` in `src/late_checkout/core/pricing.py`.
+- Updated `src/late_checkout/core/services.py` to instantiate `DynamicPricingService` and calculate quote.
+- Updated router to map ValueError to 400 HTTPException.
 - Created Pydantic DTOs for create and response schemas in `src/late_checkout/api/schemas.py`.
 - Added business logic service layer in `src/late_checkout/core/services.py` with DB dependency injection.
 - Created `APIRouter` in `src/late_checkout/api/routers/extension_requests.py` for POST and GET.

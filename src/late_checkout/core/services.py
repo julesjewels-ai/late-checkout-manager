@@ -4,6 +4,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from late_checkout.api.schemas import ExtensionRequestCreate
+from late_checkout.core.pricing import DynamicPricingService
 from late_checkout.models import Booking, ExtensionRequest
 
 
@@ -19,11 +20,19 @@ def create_extension_request(
     if not booking:
         raise BookingNotFoundError(f"Booking {request_data.booking_id} not found")
 
+    # Calculate price quote
+    pricing_service = DynamicPricingService(base_hourly_rate=1.0)
+    price_quote = pricing_service.calculate_extension_price(
+        original_checkout=booking.original_checkout,  # type: ignore
+        requested_time=request_data.requested_time,
+    )
+
     # Create extension request
     new_request = ExtensionRequest(
         booking_id=request_data.booking_id,
         requested_time=request_data.requested_time,
         status="pending",
+        price_quote=price_quote,
     )
     db.add(new_request)
     db.commit()
