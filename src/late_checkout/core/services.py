@@ -1,9 +1,11 @@
+from datetime import timezone
 from typing import List
 from uuid import UUID
 
 from sqlalchemy.orm import Session
 
 from late_checkout.api.schemas import ExtensionRequestCreate
+from late_checkout.core.pricing import IPricingService
 from late_checkout.models import Booking, ExtensionRequest
 
 
@@ -11,19 +13,44 @@ class BookingNotFoundError(Exception):
     pass
 
 
+class InvalidExtensionTimeError(Exception):
+    pass
+
+
 def create_extension_request(
-    db: Session, request_data: ExtensionRequestCreate
+    db: Session, request_data: ExtensionRequestCreate, pricing_service: IPricingService
 ) -> ExtensionRequest:
     # Validate booking exists
     booking = db.query(Booking).filter(Booking.id == request_data.booking_id).first()
     if not booking:
         raise BookingNotFoundError(f"Booking {request_data.booking_id} not found")
 
+    original_dt = (
+        booking.original_checkout.replace(tzinfo=timezone.utc)
+        if booking.original_checkout.tzinfo is None
+        else booking.original_checkout.astimezone(timezone.utc)
+    )
+    requested_dt = (
+        request_data.requested_time.replace(tzinfo=timezone.utc)
+        if request_data.requested_time.tzinfo is None
+        else request_data.requested_time.astimezone(timezone.utc)
+    )
+
+    if requested_dt <= original_dt:
+        raise InvalidExtensionTimeError(
+            "Requested time must be after the original checkout time"
+        )
+
+    price_quote = pricing_service.calculate_price(
+        booking.original_checkout, request_data.requested_time
+    )  # type: ignore
+
     # Create extension request
     new_request = ExtensionRequest(
         booking_id=request_data.booking_id,
         requested_time=request_data.requested_time,
         status="pending",
+        price_quote=price_quote,
     )
     db.add(new_request)
     db.commit()
