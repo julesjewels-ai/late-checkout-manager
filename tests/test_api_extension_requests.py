@@ -77,9 +77,17 @@ def test_booking(db_session: Session) -> uuid.UUID:
 
 
 def test_create_extension_request_success(
-    client: TestClient, test_booking: uuid.UUID
+    client: TestClient, test_booking: uuid.UUID, db_session: Session
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    # Query exact stored timestamp
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    original_checkout = (
+        booking.original_checkout.replace(tzinfo=timezone.utc)
+        if booking.original_checkout.tzinfo is None
+        else booking.original_checkout.astimezone(timezone.utc)
+    )
+
+    requested_time = (original_checkout + timedelta(hours=2)).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -92,6 +100,28 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+    assert data["price_quote"] == pytest.approx(2.0, rel=1e-2)
+
+
+def test_create_extension_request_invalid_time(
+    client: TestClient, test_booking: uuid.UUID, db_session: Session
+) -> None:
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    original_checkout = (
+        booking.original_checkout.replace(tzinfo=timezone.utc)
+        if booking.original_checkout.tzinfo is None
+        else booking.original_checkout.astimezone(timezone.utc)
+    )
+
+    requested_time = (original_checkout - timedelta(hours=2)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
