@@ -1,0 +1,27 @@
+src/late_checkout/main.py
+    F 18:0 root - A (1)
+    C 13:0 Message - A (1)
+src/late_checkout/models.py
+    C 10:0 User - A (1)
+    C 21:0 Booking - A (1)
+    C 34:0 ExtensionRequest - A (1)
+src/late_checkout/api/schemas.py
+    C 8:0 ExtensionRequestCreate - A (1)
+    C 13:0 ExtensionRequestResponse - A (1)
+src/late_checkout/api/routers/extension_requests.py
+    F 28:0 create_request - A (2)
+    F 39:0 get_requests - A (2)
+    F 16:0 get_db - A (1)
+src/late_checkout/core/config.py
+    C 4:0 Settings - A (1)
+src/late_checkout/core/services.py
+    F 14:0 create_extension_request - A (2)
+    F 34:0 get_extension_requests - A (2)
+    C 10:0 BookingNotFoundError - A (1)
+src/late_checkout/domain/models.py
+    C 7:0 User - A (1)
+    C 14:0 Booking - A (1)
+    C 22:0 ExtensionRequest - A (1)
+
+17 blocks (classes, functions, methods) analyzed.
+Average complexity: A (1.2352941176470589)
