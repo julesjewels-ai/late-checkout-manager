@@ -1,7 +1,7 @@
-fastapi
+fastapi>=0.109.1
 uvicorn
 pydantic
-pytest
+pytest>=9.0.3
 httpx
 mypy
 flake8
@@ -10,7 +10,7 @@ radon
 sqlalchemy
 psycopg2-binary
 alembic
-python-dotenv
+python-dotenv>=1.2.2
 email-validator
 pydantic-settings
 pip-tools
