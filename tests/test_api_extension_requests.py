@@ -10,8 +10,9 @@ from sqlalchemy.pool import StaticPool
 
 from late_checkout.main import app
 from late_checkout.core.database import Base
-from late_checkout.api.routers.extension_requests import get_db
+from late_checkout.api.routers.extension_requests import get_db, get_pricing_service
 from late_checkout.models import User, Booking
+from late_checkout.core.pricing import DynamicPricingService, IPricingService
 
 
 # Setup an in-memory SQLite database for testing
@@ -45,7 +46,11 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
         finally:
             pass
 
+    def override_get_pricing_service() -> IPricingService:
+        return DynamicPricingService(base_rate_per_hour=20.0)
+
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_pricing_service] = override_get_pricing_service
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
@@ -91,7 +96,23 @@ def test_create_extension_request_success(
     data = response.json()
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
+    assert data["price_quote"] == pytest.approx(40.0, rel=1e-2)
     assert "id" in data
+
+
+def test_create_extension_request_invalid_time(
+    client: TestClient, test_booking: uuid.UUID
+) -> None:
+    requested_time = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Requested time must be after original checkout"
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
