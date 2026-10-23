@@ -27,3 +27,9 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# Media files
+*.mp4
+*.mov
+*.avi
+media/
