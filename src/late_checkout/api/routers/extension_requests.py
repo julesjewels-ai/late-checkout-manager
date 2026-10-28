@@ -11,6 +11,7 @@ from late_checkout.core.services import (
     get_extension_requests,
     BookingNotFoundError,
 )
+from late_checkout.core.pricing import DynamicPricingService
 
 
 def get_db() -> Session:  # type: ignore
@@ -29,10 +30,13 @@ def create_request(
     request_data: ExtensionRequestCreate, db: Session = Depends(get_db)
 ) -> ExtensionRequestResponse:
     try:
-        new_request = create_extension_request(db, request_data)
+        pricing_service = DynamicPricingService(hourly_rate=20.0)
+        new_request = create_extension_request(db, request_data, pricing_service)
         return ExtensionRequestResponse.model_validate(new_request)
     except BookingNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/", response_model=List[ExtensionRequestResponse])

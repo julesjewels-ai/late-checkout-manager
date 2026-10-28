@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from late_checkout.api.schemas import ExtensionRequestCreate
 from late_checkout.models import Booking, ExtensionRequest
+from late_checkout.core.pricing import IPricingService
 
 
 class BookingNotFoundError(Exception):
@@ -12,7 +13,7 @@ class BookingNotFoundError(Exception):
 
 
 def create_extension_request(
-    db: Session, request_data: ExtensionRequestCreate
+    db: Session, request_data: ExtensionRequestCreate, pricing_service: IPricingService
 ) -> ExtensionRequest:
     # Validate booking exists
     booking = db.query(Booking).filter(Booking.id == request_data.booking_id).first()
@@ -24,6 +25,9 @@ def create_extension_request(
         booking_id=request_data.booking_id,
         requested_time=request_data.requested_time,
         status="pending",
+        price_quote=pricing_service.calculate_price(
+            booking, request_data.requested_time
+        ),
     )
     db.add(new_request)
     db.commit()
