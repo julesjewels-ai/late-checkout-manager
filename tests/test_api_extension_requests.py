@@ -77,21 +77,24 @@ def test_booking(db_session: Session) -> uuid.UUID:
 
 
 def test_create_extension_request_success(
-    client: TestClient, test_booking: uuid.UUID
+    client: TestClient, db_session: Session, test_booking: uuid.UUID
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    # Get the actual test booking from db
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    requested_time = (booking.original_checkout + timedelta(hours=2)).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
-            "booking_id": str(test_booking),
+            "booking_id": str(booking.id),
             "requested_time": requested_time,
         },
     )
     assert response.status_code == 201
     data = response.json()
-    assert data["booking_id"] == str(test_booking)
+    assert data["booking_id"] == str(booking.id)
     assert data["status"] == "pending"
     assert "id" in data
+    assert data["price_quote"] == pytest.approx(40.0, rel=1e-2)
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
