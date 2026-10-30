@@ -77,9 +77,11 @@ def test_booking(db_session: Session) -> uuid.UUID:
 
 
 def test_create_extension_request_success(
-    client: TestClient, test_booking: uuid.UUID
+    client: TestClient, test_booking: uuid.UUID, db_session: Session
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    booking = db_session.query(Booking).get(test_booking)
+    # type: ignore
+    requested_time = (booking.original_checkout + timedelta(hours=2)).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -92,6 +94,27 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+    assert data["price_quote"] == pytest.approx((2.0 * 10.0), rel=1e-2)
+
+
+def test_create_extension_request_before_checkout(
+    client: TestClient, test_booking: uuid.UUID, db_session: Session
+) -> None:
+    booking = db_session.query(Booking).get(test_booking)
+    # type: ignore
+    requested_time = (booking.original_checkout - timedelta(hours=2)).isoformat()
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time,
+        },
+    )
+    assert response.status_code == 400
+    assert (
+        response.json()["detail"]
+        == "Requested time must be after the original checkout time."
+    )
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
