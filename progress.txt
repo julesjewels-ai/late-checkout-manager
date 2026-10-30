@@ -1,7 +1,7 @@
 Task: Implement Extension Request API
-Status: Completed
-Current Action: Implemented schemas, services, and routers for extension requests.
-Next Action: Implement Pricing Logic.
+Status: In Progress
+Current Action: Implemented Pricing Logic.
+Next Action: Implement Payment Integration (Stripe).
 Notes:
 - Created Pydantic DTOs for create and response schemas in `src/late_checkout/api/schemas.py`.
 - Added business logic service layer in `src/late_checkout/core/services.py` with DB dependency injection.
