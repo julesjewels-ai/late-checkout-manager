@@ -24,8 +24,8 @@
 - [x] Implement Extension Request API (Current Task)
   - [x] Create endpoints for creating requests
   - [x] Create endpoints for viewing requests
-- [ ] Implement Pricing Logic
-  - [ ] Create dynamic pricing service
+- [x] Implement Pricing Logic
+  - [x] Create dynamic pricing service
 - [ ] Implement Payment Integration (Stripe)
   - [ ] Create payment intent
   - [ ] Handle webhook events
