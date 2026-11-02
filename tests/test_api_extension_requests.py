@@ -94,6 +94,36 @@ def test_create_extension_request_success(
     assert "id" in data
 
 
+def test_create_extension_request_pricing(
+    client: TestClient, db_session: Session, test_booking: uuid.UUID
+) -> None:
+    # Get the original checkout from DB to do exact math
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    assert booking is not None
+    original_checkout = booking.original_checkout
+
+    aware_checkout = (
+        original_checkout.replace(tzinfo=timezone.utc)
+        if original_checkout.tzinfo is None
+        else original_checkout
+    )
+
+    diff_hours = 2.5
+    requested_time = aware_checkout + timedelta(hours=diff_hours)
+
+    response = client.post(
+        "/extension-requests/",
+        json={
+            "booking_id": str(test_booking),
+            "requested_time": requested_time.isoformat(),
+        },
+    )
+
+    assert response.status_code == 201
+    data = response.json()
+    assert data["price_quote"] == 10.0 * diff_hours
+
+
 def test_create_extension_request_not_found(client: TestClient) -> None:
     fake_id = str(uuid.uuid4())
     requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
