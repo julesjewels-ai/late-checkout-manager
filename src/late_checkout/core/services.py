@@ -1,3 +1,4 @@
+from datetime import timezone
 from typing import List
 from uuid import UUID
 
@@ -5,6 +6,8 @@ from sqlalchemy.orm import Session
 
 from late_checkout.api.schemas import ExtensionRequestCreate
 from late_checkout.models import Booking, ExtensionRequest
+
+BASE_HOURLY_RATE = 10.0
 
 
 class BookingNotFoundError(Exception):
@@ -19,11 +22,28 @@ def create_extension_request(
     if not booking:
         raise BookingNotFoundError(f"Booking {request_data.booking_id} not found")
 
+    original_checkout = (
+        booking.original_checkout.replace(tzinfo=timezone.utc)
+        if booking.original_checkout.tzinfo is None
+        else booking.original_checkout
+    )
+
+    requested_time = (
+        request_data.requested_time.replace(tzinfo=timezone.utc)
+        if request_data.requested_time.tzinfo is None
+        else request_data.requested_time
+    )
+
+    time_diff = requested_time - original_checkout
+    hours = time_diff.total_seconds() / 3600.0
+    price_quote = max(0.0, hours * BASE_HOURLY_RATE)
+
     # Create extension request
     new_request = ExtensionRequest(
         booking_id=request_data.booking_id,
         requested_time=request_data.requested_time,
         status="pending",
+        price_quote=price_quote,
     )
     db.add(new_request)
     db.commit()
