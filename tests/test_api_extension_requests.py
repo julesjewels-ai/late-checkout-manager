@@ -10,7 +10,8 @@ from sqlalchemy.pool import StaticPool
 
 from late_checkout.main import app
 from late_checkout.core.database import Base
-from late_checkout.api.routers.extension_requests import get_db
+from late_checkout.api.routers.extension_requests import get_db, get_pricing_service
+from late_checkout.core.pricing import IPricingService
 from late_checkout.models import User, Booking
 
 
@@ -37,6 +38,13 @@ def db_session() -> Generator[Session, None, None]:
         Base.metadata.drop_all(bind=engine)
 
 
+class MockPricingService(IPricingService):
+    def calculate_price(
+        self, original_checkout: datetime, requested_time: datetime
+    ) -> float:
+        return 50.0
+
+
 @pytest.fixture(scope="function")
 def client(db_session: Session) -> Generator[TestClient, None, None]:
     def override_get_db() -> Generator[Session, None, None]:
@@ -46,6 +54,7 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
             pass
 
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_pricing_service] = lambda: MockPricingService()
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()
@@ -91,6 +100,7 @@ def test_create_extension_request_success(
     data = response.json()
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
+    assert data["price_quote"] == 50.0
     assert "id" in data
 
 
