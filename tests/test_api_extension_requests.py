@@ -77,9 +77,15 @@ def test_booking(db_session: Session) -> uuid.UUID:
 
 
 def test_create_extension_request_success(
-    client: TestClient, test_booking: uuid.UUID
+    client: TestClient, test_booking: uuid.UUID, db_session: Session
 ) -> None:
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    checkout = (
+        booking.original_checkout.replace(tzinfo=timezone.utc)  # type: ignore
+        if booking.original_checkout.tzinfo is None  # type: ignore
+        else booking.original_checkout
+    )
+    requested_time = (checkout + timedelta(hours=2)).isoformat()
     response = client.post(
         "/extension-requests/",
         json={
@@ -92,6 +98,8 @@ def test_create_extension_request_success(
     assert data["booking_id"] == str(test_booking)
     assert data["status"] == "pending"
     assert "id" in data
+    assert "price_quote" in data
+    assert data["price_quote"] == 20.0
 
 
 def test_create_extension_request_not_found(client: TestClient) -> None:
@@ -108,9 +116,17 @@ def test_create_extension_request_not_found(client: TestClient) -> None:
     assert response.json()["detail"] == f"Booking {fake_id} not found"
 
 
-def test_get_extension_requests(client: TestClient, test_booking: uuid.UUID) -> None:
+def test_get_extension_requests(
+    client: TestClient, test_booking: uuid.UUID, db_session: Session
+) -> None:
     # First create a request
-    requested_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+    booking = db_session.query(Booking).filter(Booking.id == test_booking).first()
+    checkout = (
+        booking.original_checkout.replace(tzinfo=timezone.utc)  # type: ignore
+        if booking.original_checkout.tzinfo is None  # type: ignore
+        else booking.original_checkout
+    )
+    requested_time = (checkout + timedelta(hours=2)).isoformat()
     create_response = client.post(
         "/extension-requests/",
         json={
